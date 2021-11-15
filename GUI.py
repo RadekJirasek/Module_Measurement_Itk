@@ -1,12 +1,26 @@
 from main import*
 import tkinter
 from tkinter import*
+import sys
+
+# Define path to folder with files and screens.
+if len(sys.argv) >= 3:
+    if isinstance(sys.argv[2], str):
+        # path can be get via argument calling in console
+        Com.set_path(sys.argv[2])
+    else:
+        # or path will be obtain from location of program
+        Com.set_path('/'.join(sys.argv[0].split("/")[:-1]))
+else:
+    # or path will be obtain from location of program
+    Com.set_path('/'.join(sys.argv[0].split("/")[:-1]))
 
 # ↓ settings for GUI
 MM = tkinter.Tk()
 MM.title("Module ITk measurement")
 MM.resizable(0, 0)
 Com.set_gui(MM)
+
 # ↓ variables for sesions
 checkCoordinate = IntVar()
 checkPosHybrid = IntVar()
@@ -18,6 +32,7 @@ checkModuleBow = IntVar()
 
 # ↓ functions for GUI
 def start():
+    Com.set_log()  # set name of log file according to actual time and date
     sesions = []
     if CheckCoordinate.var.get():
         sesions.append(Sesion("coordinate", sesion_coordinate_lp, sesion_coordinate_hp))
@@ -124,11 +139,9 @@ CheckSurfaceBoard.select()
 CheckModuleBow.select()
 try:
     pass
-    # MM.iconbitmap("")
+    # MM.iconbitmap(MM_icon.get_img())
 except tkinter.TclError:
     pass  # It doesn't matter, if program can't import icon.
 
-
-# SMS.protocol("WM_DELETE_WINDOW", on_closing)
+# Loop of GUI. It maintains window opened.
 MM.mainloop()
-# ↑ Loop of GUI. It maintains window opened.

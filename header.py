@@ -1,16 +1,16 @@
 from PIL import Image, ImageTk
 import pyautogui as pag
-import time
+import datetime
 
 
 class Com:
-    # log metody
+    path = ""
 
-    def __int__(self):
-        pass
-
-    def message(self):
-        pass
+    @classmethod
+    def set_path(cls, _path):
+        if _path[-1] != "\\":
+            _path += "\\"
+        cls.path = _path
 
     @classmethod
     def set_gui(cls, _gui):
@@ -21,6 +21,16 @@ class Com:
     def set_type(cls, _type):
         # method for define type of module
         cls.type = _type
+
+    @classmethod
+    def set_log(cls):
+        cls.log_file = "logs\\" + datetime.datetime.now().strftime("%y_%m_%d_%H_%M") + ".txt"
+        with open(cls.path + cls.log_file, 'w') as file:
+            file.close()
+
+    def save_log(self, message):
+        with open(self.path + self.log_file, 'a') as file:
+            file.write(message)
 
     def delay(self, time_ms):
         self.gui.after(time_ms)
@@ -35,11 +45,11 @@ class Object(Com):
 
     def __init__(self, img_address, x=0, y=0, img_format='L'):
         self.position = (x, y)
-        self.img_address = img_address
+        self.img_address = self.path + "screens\\" + img_address
         self.img_format = img_format
         self.x_range = pag.size()[0] - x
         self.y_range = pag.size()[1] - y
-        self.load_img(self)  # ? musi byt jiz loadnuty v find_pos
+        self.load_img()  # ? musi byt jiz loadnuty v find_pos
 
     def pos(self):
         return self.position
@@ -48,7 +58,6 @@ class Object(Com):
         return pag.locateCenterOnScreen(self._image, grayscale=grayscale,
                                         region=(self.position[0], self.position[1], self.x_range, self.y_range))
 
-    @staticmethod
     def load_img(self):
         try:
             self._image = ImageTk.PhotoImage(Image.open(self.img_address))
@@ -79,7 +88,7 @@ class Sesion(Com):
         self.finding_height_dir = _finding_height_dir
 
     def __del__(self):
-        self.message()
+        self.save_log()
 
     def wait(self, control_picture):
         if not control_picture.if_exist():
@@ -95,7 +104,7 @@ class Sesion(Com):
 
         while self.wait(height):
             if self.finding_change_indexes:
-                self.message()
+                self.save_log()
                 self.__del__()
             if self.finding_height_attempt in self.finding_change_indexes:
                 self.finding_height_dir = not self.finding_height_dir
@@ -104,7 +113,7 @@ class Sesion(Com):
                         low.click()
                     else:
                         high.click()
-                    time.sleep(0.5)
+                    self.gui.after(500)
                 self.finding_change_indexes = self.finding_change_indexes[1:]
 
             if self.finding_height_dir:

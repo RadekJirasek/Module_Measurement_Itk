@@ -7,11 +7,12 @@ def control(sesion, wait_object, catch_object):
         # waiting for end of sesion
         if sesion.wait(catch_object):
             # condition for error message
+            sesion.save_log("\n" + datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+                            + "| Program detect error screen in %s sesion." % sesion.name)
             break
-            # log o erroru
     else:
-        pass
-        # log o uspechu
+        sesion.save_log("\n" + datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+                        + "| %s has been successfully done." % sesion.name)
 
 
 def main(sesions):
@@ -31,4 +32,4 @@ def main(sesions):
         # start the sesion
         control(sesion, end_screen, error_screen)
 
-        # restart programu, uvedeni programu do puvodni pozice
+        # CHYBI: restart programu, uvedeni programu do puvodni pozice
