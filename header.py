@@ -8,8 +8,7 @@ class Com:
 
     @classmethod
     def set_path(cls, _path):
-        if _path[-1] != "\\":
-            _path += "\\"
+        _path += "\\"
         cls.path = _path
 
     @classmethod
@@ -18,9 +17,10 @@ class Com:
         cls.gui = _gui
 
     @classmethod
-    def set_type(cls, _type):
+    def set_type(cls, _type, __menu):
         # method for define type of module
         cls.type = _type
+        __menu["text"] = "Selected type of module - %s" % cls.type
 
     @classmethod
     def set_log(cls):
@@ -88,7 +88,8 @@ class Sesion(Com):
         self.finding_height_dir = _finding_height_dir
 
     def __del__(self):
-        self.save_log()
+        self.save_log("\n" + datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+                      + "| Sesion %s has been end." % self.name)
 
     def wait(self, control_picture):
         if not control_picture.if_exist():
@@ -103,8 +104,9 @@ class Sesion(Com):
         height.find_pos()
 
         while self.wait(height):
-            if self.finding_change_indexes:
-                self.save_log()
+            if not self.finding_change_indexes:
+                self.save_log("\n" + datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+                              + "| Can not be set correct height of station in %s sesion." % self.name)
                 self.__del__()
             if self.finding_height_attempt in self.finding_change_indexes:
                 self.finding_height_dir = not self.finding_height_dir
@@ -113,7 +115,7 @@ class Sesion(Com):
                         low.click()
                     else:
                         high.click()
-                    self.gui.after(500)
+                    self.delay(500)
                 self.finding_change_indexes = self.finding_change_indexes[1:]
 
             if self.finding_height_dir:
