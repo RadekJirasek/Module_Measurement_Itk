@@ -29,27 +29,36 @@ try:
     # ↓ functions for GUI
     def start():
         Com.set_log()  # set name of log file according to actual time and date
-        Com.set_serial_number(SerialNumber.get())
-        sesions = []
-
-        if CheckCoordinate.var.get():
-            sesions.append(Sesion("coordinate", sesion_coordinate_lp, sesion_coordinate_hp))
-        if CheckPosHybrid.var.get():
-            sesions.append(Sesion("posHybrid", sesion_posHybird_lp, sesion_posHybrid_hp))
-        """
-        if CheckPosBoard.var.get():
-            sesions.append(Sesion("posBoard", sesion_posBoard_lp, sesion_posBoard_hp))
-        if CheckGlueT.var.get():
-            sesions.append(Sesion("glueT", sesion_glueT_lp, sesion_glueT_hp))
-        if CheckSurfaceBoard.var.get():
-            sesions.append(Sesion("faceBoard", sesion_surfaceBoard_lp, sesion_serfaceBoard_hp))
-        if CheckModuleBow.var.get():
-            sesions.append(Sesion("moduleBow", sesion_moduleBow_lp, sesion_moduleBow_hp))
-        """
-        if not sesions:
-            pag.alert("You must choose at least one possibility!", "Alert")
+        if memory("RAM") < 500:
+            Com.save_log(message="\n" + datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+                         + "|There is too little of RAM memory.\tRequired: 500 MB, but is "
+                                 + str(memory("RAM")) + " MB")
+        elif memory(Com.path[0:2]) < 0.1:
+            Com.save_log(message="\n" + datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+                         + "|There is too little of memory on local " + Com.path[0:2]
+                                 + " disk\tRequired: 100 MB, but is: " + str(memory(Com.path[0:2])*1000) + " MB")
         else:
-            main(sesions)
+            Com.set_serial_number(SerialNumber.get())
+            sesions = []
+
+            if CheckCoordinate.var.get():
+                sesions.append(Sesion("coordinate", sesion_coordinate_lp, sesion_coordinate_hp))
+            if CheckPosHybrid.var.get():
+                sesions.append(Sesion("posHybrid", sesion_posHybird_lp, sesion_posHybrid_hp))
+            """
+            if CheckPosBoard.var.get():
+                sesions.append(Sesion("posBoard", sesion_posBoard_lp, sesion_posBoard_hp))
+            if CheckGlueT.var.get():
+                sesions.append(Sesion("glueT", sesion_glueT_lp, sesion_glueT_hp))
+            if CheckSurfaceBoard.var.get():
+                sesions.append(Sesion("faceBoard", sesion_surfaceBoard_lp, sesion_serfaceBoard_hp))
+            if CheckModuleBow.var.get():
+                sesions.append(Sesion("moduleBow", sesion_moduleBow_lp, sesion_moduleBow_hp))
+            """
+            if not sesions:
+                pag.alert("You must choose at least one possibility!", "Alert")
+            else:
+                main(sesions)
 
 
     # ↓ Set properties of window and objects(buttons, menu, etc...).

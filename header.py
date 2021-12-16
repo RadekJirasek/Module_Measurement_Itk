@@ -1,6 +1,26 @@
 from PIL import Image, ImageTk
 import pyautogui as pag
 import datetime
+from psutil import virtual_memory
+from shutil import disk_usage
+
+
+def memory(memory_type):
+    free_size = 0
+    if memory_type == "RAM":
+        free_size = virtual_memory()[4] / (2**20)
+    else:
+        free_size = disk_usage(memory_type)[2] / (2**30)
+
+    return round(free_size, 3)
+
+
+def w(im, reg, session):
+    if not pag.locateCenterOnScreen(im.img_address, grayscale=True, region=reg, confidence=0.9):
+        session.finding_height_attempt += 1
+        return True
+    else:
+        return False
 
 
 class Com:
@@ -8,6 +28,7 @@ class Com:
 
     @classmethod
     def set_path(cls, _path):
+        # method for set path of program folder
         _path += "\\"
         cls.path = _path
 
@@ -27,7 +48,9 @@ class Com:
         cls.log_file = "C:\\Users\\student\\Documents\\" \
                        + "logs\\" + datetime.datetime.now().strftime("%y_%m_%d_%H_%M") + ".txt"
         with open(cls.log_file, 'w+') as file:
-            # write initial text to log
+            file.write("\n\nSTART OF MEASURING: " + datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+                       + "\nFree data size on DISK: " + str(memory(cls.path[0:2]))
+                       + " GB\n_________________________________________")
             file.close()
 
     @classmethod
@@ -40,16 +63,6 @@ class Com:
 
     def delay(self, time_ms):
         self.gui.after(time_ms)
-
-
-def w(im, reg, session):
-    if not pag.locateCenterOnScreen(im.img_address, grayscale=True, region=reg, confidence=0.9):
-        session.finding_height_attempt += 1
-        pag.alert("w NOT found")
-        return True
-    else:
-        pag.alert("w Found")
-        return False
 
 
 class Object(Com):
@@ -78,7 +91,6 @@ class Object(Com):
             self._image = ImageTk.PhotoImage(Image.open(self.img_address))
         except OSError:
             raise AssertionError("Not found '%s' screenshot." % self.img_address)
-            # log
 
     def click(self, x_offset=0, y_offset=0):
         pag.click((self.position[0] + x_offset, self.position[1] + y_offset))
@@ -86,13 +98,12 @@ class Object(Com):
     def find_pos(self, grayscale=True):
         _position = self.if_exist(grayscale)
         if _position:
-            pag.alert("Found")
             self.position = _position
             self.x_range = pag.size()[0] - self.position[0]
             self.y_range = pag.size()[1] - self.position[1]
         else:
-            pag.alert("Not found")
-            # log
+            self.save_log("\n" + datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+                          + "| Position of screen from %s has not been found." % self.img_address)
 
     def get_img(self):
         return self._image
@@ -116,27 +127,19 @@ class Sesion(Com):
     @staticmethod
     def wait(control_picture):
         if not control_picture.if_exist():
-            pag.alert("w NOT found")
             return True
         else:
-            pag.alert("w Found")
             return False
 
     def set_height(self, low, high, height):
-        pag.alert("s00")
         if self.end:
-            pag.alert("s0")
             return 0
-        pag.alert("s1")
         low.find_pos()
-        pag.alert("s2")
         high.find_pos()
-        pag.alert("s3")
 
         height.position = high.pos()
         height.x_range = 100
         height.y_range = 80
-        pag.alert("s4")
 
         while w(height, (high.pos()[0], high.pos()[1], 100, 80), self):
             pag.alert("sW")
@@ -184,10 +187,9 @@ class Sesion(Com):
             return 0
         start_ses.find_pos()
         start_ses.click(2, 2)
+        # next things ..?
 
     def end_sesion(self):
         self.end = True
         # things for end sesion after measuring (reset, ...)
         pass
-
-    # doplnit

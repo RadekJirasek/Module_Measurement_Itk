@@ -16,38 +16,28 @@ def control(sesion, wait_object, catch_object):
                         + "| %s has been successfully done." % sesion.name)
 
 
-def main(sesions):
-    for sesion in sesions:
+def main(sessions):
+    for session in sessions:
         if not program_icon.if_exist():
-            pag.alert("Info 1")
             program_start.find_pos()
-            pag.alert("Info 2")
             program_start.click()
-            control(sesion, program_icon, error_screen)
-            pag.alert("Info 3")
+            control(session, program_icon, error_screen)
 
-        pag.alert("Info 3.5")
-
-        sesion.set_height(b_Lower, b_Higher, sesion.screen_lr)
+        session.set_height(b_Lower, b_Higher, session.screen_lr)
         # Set height roughly
-
-        pag.alert("Info 4")
-
-        control(sesion, height_good_screen, error_screen)
-
-        pag.alert("Info 5")
-
-        sesion.set_height(b_lower, b_higher, sesion.screen_hr)
+        # control(session, height_good_screen, error_screen)
+        # control height (not necessary)
+        session.set_height(b_lower, b_higher, session.screen_hr)
         # Set height with more precision
-        control(sesion, height_good_screen, error_screen)
-
-        pag.alert("Info 7")
-
-        sesion.open_sesion(b_sesion)
-        # open new sesion
-        control(sesion, opend_sesion_screen, error_screen)
-        sesion.start_sesion(b_start_session)
-        # start the sesion
-        control(sesion, end_screen, error_screen)
-
-        # CHYBI: restart programu, uvedeni programu do puvodni pozice
+        # control(session, height_good_screen, error_screen)
+        # control height (not necessary)
+        session.open_sesion(b_sesion)
+        # open new session
+        control(session, opend_sesion_screen, error_screen)
+        # control if session has been opened actually successfully
+        session.start_sesion(b_start_session)
+        # start the session
+        control(session, end_screen, error_screen)
+        # control if session has been started actually successfully
+        session.end_sesion()
+        # end session and restart program
