@@ -26,16 +26,17 @@ try:
     checkSurfaceBoard = IntVar()
     checkModuleBow = IntVar()
 
-
     # ↓ functions for GUI
     def start():
         Com.set_log()  # set name of log file according to actual time and date
+        Com.set_serial_number(SerialNumber.get())
         sesions = []
+
         if CheckCoordinate.var.get():
             sesions.append(Sesion("coordinate", sesion_coordinate_lp, sesion_coordinate_hp))
-        """
         if CheckPosHybrid.var.get():
             sesions.append(Sesion("posHybrid", sesion_posHybird_lp, sesion_posHybrid_hp))
+        """
         if CheckPosBoard.var.get():
             sesions.append(Sesion("posBoard", sesion_posBoard_lp, sesion_posBoard_hp))
         if CheckGlueT.var.get():
@@ -45,7 +46,10 @@ try:
         if CheckModuleBow.var.get():
             sesions.append(Sesion("moduleBow", sesion_moduleBow_lp, sesion_moduleBow_hp))
         """
-        main(sesions)
+        if not sesions:
+            pag.alert("You must choose at least one possibility!", "Alert")
+        else:
+            main(sesions)
 
 
     # ↓ Set properties of window and objects(buttons, menu, etc...).
@@ -56,13 +60,31 @@ try:
     TypeMenu.menu = Menu(TypeMenu, tearoff=1)
     TypeMenu["menu"] = TypeMenu.menu
 
-    TypeMenu.menu.add_command(command=R0.set_type("R0", TypeMenu), image=R0.get_img())
-    TypeMenu.menu.add_command(command=R1.set_type("R1", TypeMenu), image=R1.get_img())
-    TypeMenu.menu.add_command(command=R2.set_type("R2", TypeMenu), image=R2.get_img())
-    TypeMenu.menu.add_command(command=R3.set_type("R3", TypeMenu), image=R3.get_img())
-    TypeMenu.menu.add_command(command=R4.set_type("R4", TypeMenu), image=R4.get_img())
-    TypeMenu.menu.add_command(command=R5.set_type("R5", TypeMenu), image=R5.get_img())
-    TypeMenu["text"] = "Select type of module"
+    def r0():
+        R0.set_type("R0", TypeMenu)
+
+    def r1():
+        R0.set_type("R1", TypeMenu)
+
+    def r2():
+        R0.set_type("R2", TypeMenu)
+
+    def r3():
+        R0.set_type("R3", TypeMenu)
+
+    def r4():
+        R0.set_type("R4", TypeMenu)
+
+    def r5():
+        R0.set_type("R5", TypeMenu)
+
+    TypeMenu.menu.add_command(command=r0, image=R0.get_img())
+    TypeMenu.menu.add_command(command=r1, image=R1.get_img())
+    TypeMenu.menu.add_command(command=r2, image=R2.get_img())
+    TypeMenu.menu.add_command(command=r3, image=R3.get_img())
+    TypeMenu.menu.add_command(command=r4, image=R4.get_img())
+    TypeMenu.menu.add_command(command=r5, image=R5.get_img())
+    TypeMenu["text"] = "Select type of module, please"
 
     frameTop = tkinter.Frame(MM)
     frameDown = tkinter.Frame(MM)
@@ -95,7 +117,8 @@ try:
     CheckPosBoard.var = checkPosBoard
     CheckGlueT = tkinter.Checkbutton(frameDownTT, text="Glue thickness", width=33, variable=checkGlueT)
     CheckGlueT.var = checkGlueT
-    CheckSurfaceBoard = tkinter.Checkbutton(frameDownTB, text="Power board surface", width=31, variable=checkSurfaceBoard)
+    CheckSurfaceBoard = tkinter.Checkbutton(frameDownTB, text="Power board surface",
+                                            width=31, variable=checkSurfaceBoard)
     CheckSurfaceBoard.var = checkSurfaceBoard
     CheckModuleBow = tkinter.Checkbutton(frameDownTB, text="Module bow", width=34, variable=checkModuleBow)
     CheckModuleBow.var = checkModuleBow

@@ -24,12 +24,18 @@ class Com:
 
     @classmethod
     def set_log(cls):
-        cls.log_file = "logs\\" + datetime.datetime.now().strftime("%y_%m_%d_%H_%M") + ".txt"
-        with open(cls.path + cls.log_file, 'w') as file:
+        cls.log_file = "C:\\Users\\student\\Documents\\" \
+                       + "logs\\" + datetime.datetime.now().strftime("%y_%m_%d_%H_%M") + ".txt"
+        with open(cls.log_file, 'w+') as file:
+            # write initial text to log
             file.close()
 
+    @classmethod
+    def set_serial_number(cls, _serial_number):
+        cls.serial_number = _serial_number
+
     def save_log(self, message):
-        with open(self.path + self.log_file, 'a') as file:
+        with open(self.log_file, 'a') as file:
             file.write(message)
 
     def delay(self, time_ms):
@@ -49,13 +55,12 @@ class Object(Com):
         self.img_format = img_format
         self.x_range = pag.size()[0] - x
         self.y_range = pag.size()[1] - y
-        self.load_img()  # ? musi byt jiz loadnuty v find_pos
 
     def pos(self):
         return self.position
 
     def if_exist(self, grayscale=True):
-        return pag.locateCenterOnScreen(self._image, grayscale=grayscale,
+        return pag.locateCenterOnScreen(self.img_address, grayscale=grayscale,
                                         region=(self.position[0], self.position[1], self.x_range, self.y_range))
 
     def load_img(self):
@@ -81,6 +86,7 @@ class Sesion(Com):
     finding_height_attempt = 0
 
     def __init__(self, name, screen_lr, screen_hr, _finding_change_indexes=(3, 5, 8, 13), _finding_height_dir=True):
+        self.end = False
         self.name = name
         self.screen_lr = screen_lr
         self.screen_hr = screen_hr
@@ -99,11 +105,18 @@ class Sesion(Com):
             return False
 
     def set_height(self, low, high, height):
+        pag.alert("s00")
+        if self.end:
+            pag.alert("s0")
+            return 0
+        pag.alert("s1")
         low.find_pos()
+        pag.alert("s2")
         high.find_pos()
-        height.find_pos()
+        pag.alert("s3")
 
         while self.wait(height):
+            pag.alert("sW")
             if not self.finding_change_indexes:
                 self.save_log("\n" + datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
                               + "| Can not be set correct height of station in %s sesion." % self.name)
@@ -123,8 +136,33 @@ class Sesion(Com):
             else:
                 high.click()
 
-    @staticmethod
-    def start(load_sesion):
+    def open_sesion(self, load_sesion):
+        if self.end:
+            return 0
         load_sesion.find_pos()
         load_sesion.click(2, 2)
-        # doplnit
+        self.delay(2000)
+        pag.hotkey("alt", "d")
+        self.delay(500)
+        pag.typewrite(self.path + "Sessions\\")
+        pag.hotkey("alt", "n")
+        self.delay(500)
+        pag.typewrite(self.name + ".Session")
+
+        self.delay(1000)
+        pag.typewrite(["enter"])
+        self.delay(1000)
+        pag.typewrite(["enter"])
+
+    def start_sesion(self, start_ses):
+        if self.end:
+            return 0
+        start_ses.find_pos()
+        start_ses.click(2, 2)
+
+    def end_sesion(self):
+        self.end = True
+        # things for end sesion after measuring (reset, ...)
+        pass
+
+    # doplnit
