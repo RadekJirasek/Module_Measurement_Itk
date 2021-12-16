@@ -42,6 +42,16 @@ class Com:
         self.gui.after(time_ms)
 
 
+def w(im, reg, session):
+    if not pag.locateCenterOnScreen(im.img_address, grayscale=True, region=reg, confidence=0.9):
+        session.finding_height_attempt += 1
+        pag.alert("w NOT found")
+        return True
+    else:
+        pag.alert("w Found")
+        return False
+
+
 class Object(Com):
     x_range = pag.size()[0]
     y_range = pag.size()[1]
@@ -74,9 +84,15 @@ class Object(Com):
         pag.click((self.position[0] + x_offset, self.position[1] + y_offset))
 
     def find_pos(self, grayscale=True):
-        self.position = self.if_exist(grayscale)
-        self.x_range = pag.size()[0] - self.position[0]
-        self.y_range = pag.size()[1] - self.position[1]
+        _position = self.if_exist(grayscale)
+        if _position:
+            pag.alert("Found")
+            self.position = _position
+            self.x_range = pag.size()[0] - self.position[0]
+            self.y_range = pag.size()[1] - self.position[1]
+        else:
+            pag.alert("Not found")
+            # log
 
     def get_img(self):
         return self._image
@@ -97,11 +113,13 @@ class Sesion(Com):
         self.save_log("\n" + datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
                       + "| Sesion %s has been end." % self.name)
 
-    def wait(self, control_picture):
+    @staticmethod
+    def wait(control_picture):
         if not control_picture.if_exist():
-            self.finding_height_attempt += 1
+            pag.alert("w NOT found")
             return True
         else:
+            pag.alert("w Found")
             return False
 
     def set_height(self, low, high, height):
@@ -115,12 +133,18 @@ class Sesion(Com):
         high.find_pos()
         pag.alert("s3")
 
-        while self.wait(height):
+        height.position = high.pos()
+        height.x_range = 100
+        height.y_range = 80
+        pag.alert("s4")
+
+        while w(height, (high.pos()[0], high.pos()[1], 100, 80), self):
             pag.alert("sW")
             if not self.finding_change_indexes:
                 self.save_log("\n" + datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
                               + "| Can not be set correct height of station in %s sesion." % self.name)
-                self.__del__()
+                break
+
             if self.finding_height_attempt in self.finding_change_indexes:
                 self.finding_height_dir = not self.finding_height_dir
                 for i in range(0, self.finding_change_indexes[0]):
@@ -128,13 +152,14 @@ class Sesion(Com):
                         low.click()
                     else:
                         high.click()
-                    self.delay(500)
+                    self.delay(1000)
                 self.finding_change_indexes = self.finding_change_indexes[1:]
 
             if self.finding_height_dir:
                 low.click()
             else:
                 high.click()
+            self.delay(1500)
 
     def open_sesion(self, load_sesion):
         if self.end:
