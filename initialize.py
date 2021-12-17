@@ -21,7 +21,7 @@ b_higher = Object("higher_height.png")
 sesion_coordinate_lp = Object("sesion_coordinate_lr.png")  # object for photo of height pos. - 1. sesion, low resolution
 sesion_coordinate_hp = Object("sesion_coordinate_hr.png")
 sesion_posHybird_lp = Object("sesion_posHybrid_lr.png")
-sesion_posHybrid_hp = Object("sesion_posHybrid_lr.png")
+sesion_posHybrid_hp = Object("sesion_posHybrid_hr.png")
 
 end_screen = Object("end_screen.png")
 error_screen = Object("error_screen.png")

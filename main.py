@@ -23,11 +23,11 @@ def main(sessions):
             program_start.click()
             control(session, program_icon, error_screen)
 
-        session.set_height(b_Lower, b_Higher, session.screen_lr)
+        session.set_height(b_Lower, b_Higher, session.screen_lr.img_address)
         # Set height roughly
         # control(session, height_good_screen, error_screen)
         # control height (not necessary)
-        session.set_height(b_lower, b_higher, session.screen_hr)
+        session.set_height(b_lower, b_higher, session.screen_hr.img_address)
         # Set height with more precision
         # control(session, height_good_screen, error_screen)
         # control height (not necessary)

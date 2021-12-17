@@ -16,7 +16,7 @@ def memory(memory_type):
 
 
 def w(im, reg, session):
-    if not pag.locateCenterOnScreen(im.img_address, grayscale=True, region=reg, confidence=0.9):
+    if not pag.locateCenterOnScreen(im, grayscale=True, region=reg, confidence=0.98):
         session.finding_height_attempt += 1
         return True
     else:
@@ -48,7 +48,7 @@ class Com:
         cls.log_file = "C:\\Users\\student\\Documents\\" \
                        + "logs\\" + datetime.datetime.now().strftime("%y_%m_%d_%H_%M") + ".txt"
         with open(cls.log_file, 'w+') as file:
-            file.write("\n\nSTART OF MEASURING: " + datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+            file.write("START OF MEASURING: " + datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
                        + "\nFree data size on DISK: " + str(memory(cls.path[0:2]))
                        + " GB\n_________________________________________")
             file.close()
@@ -83,7 +83,7 @@ class Object(Com):
         return self.position
 
     def if_exist(self, grayscale=True):
-        return pag.locateCenterOnScreen(self.img_address, grayscale=grayscale,
+        return pag.locateCenterOnScreen(self.img_address, grayscale=grayscale, confidence=0.95,
                                         region=(self.position[0], self.position[1], self.x_range, self.y_range))
 
     def load_img(self):
@@ -137,12 +137,7 @@ class Sesion(Com):
         low.find_pos()
         high.find_pos()
 
-        height.position = high.pos()
-        height.x_range = 100
-        height.y_range = 80
-
         while w(height, (high.pos()[0], high.pos()[1], 100, 80), self):
-            pag.alert("sW")
             if not self.finding_change_indexes:
                 self.save_log("\n" + datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
                               + "| Can not be set correct height of station in %s sesion." % self.name)
