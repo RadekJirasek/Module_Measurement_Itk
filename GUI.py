@@ -28,8 +28,22 @@ try:
 
     # ↓ functions for GUI
     def start():
+        """mouse_1 = pag.position()
+        mouse_2 = [0, 0]
+        while mouse_1 != mouse_2:
+            mouse_1 = pag.position()
+            Com.delay(500)
+            mouse_2 = pag.position()"""
+
         Com.set_log()  # set name of log file according to actual time and date
-        if memory("RAM") < 500:
+        if SerialNumber.get() == "":
+            pag.alert("You must write a serial number of the module!", "ALERT")
+        # elif Com.type == "":
+        #    pag.alert("You must choose a type of the module!", "ALERT")
+        elif CheckCoordinate.var.get() == 0 and CheckPosHybrid.var.get() == 0 and CheckPosBoard.var.get() == 0 \
+                and CheckGlueT.var.get() == 0 and CheckSurfaceBoard.var.get() == 0 and CheckModuleBow.var.get() == 0:
+            pag.alert("You must choice at least one possibility of measuring!", "ALERT")
+        elif memory("RAM") < 500:
             Com.save_log(message="\n" + datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
                          + "|There is too little of RAM memory.\tRequired: 500 MB, but is "
                                  + str(memory("RAM")) + " MB")
@@ -44,17 +58,14 @@ try:
             if CheckCoordinate.var.get():
                 sesions.append(Sesion("coordinate", sesion_coordinate_lp, sesion_coordinate_hp))
             if CheckPosHybrid.var.get():
-                sesions.append(Sesion("posHybrid", sesion_posHybird_lp, sesion_posHybrid_hp))
-            """
+                sesions.append(Sesion("posHybrid", sesion_coordinate_lp, sesion_coordinate_hp))
             if CheckPosBoard.var.get():
-                sesions.append(Sesion("posBoard", sesion_posBoard_lp, sesion_posBoard_hp))
+                sesions.append(Sesion("posBoard", sesion_posHybird_lp, sesion_posHybrid_hp))
             if CheckGlueT.var.get():
                 sesions.append(Sesion("glueT", sesion_glueT_lp, sesion_glueT_hp))
             if CheckSurfaceBoard.var.get():
-                sesions.append(Sesion("faceBoard", sesion_surfaceBoard_lp, sesion_serfaceBoard_hp))
-            if CheckModuleBow.var.get():
-                sesions.append(Sesion("moduleBow", sesion_moduleBow_lp, sesion_moduleBow_hp))
-            """
+                sesions.append(Sesion("faceBoard", sesion_coordinate_lp, sesion_coordinate_lp))
+
             if not sesions:
                 pag.alert("You must choose at least one possibility!", "Alert")
             else:
@@ -68,31 +79,42 @@ try:
     TypeMenu.grid()
     TypeMenu.menu = Menu(TypeMenu, tearoff=1)
     TypeMenu["menu"] = TypeMenu.menu
-
+    """
     def r0():
-        R0.set_type("R0", TypeMenu)
+        Com.set_type("R0", TypeMenu)
 
     def r1():
-        R0.set_type("R1", TypeMenu)
-
+        Com.set_type("R1", TypeMenu)
+    """
     def r2():
-        R0.set_type("R2", TypeMenu)
+        Com.set_type("R2", TypeMenu)
 
+    """
     def r3():
-        R0.set_type("R3", TypeMenu)
+        Com.set_type("R3", TypeMenu)
+    """
+    def r4_m1():
+        Com.set_type("R4_M1", TypeMenu)
 
-    def r4():
-        R0.set_type("R4", TypeMenu)
-
+    def r4_m2():
+        Com.set_type("R4_M2", TypeMenu)
+    """
     def r5():
-        R0.set_type("R5", TypeMenu)
-
+        Com.set_type("R5", TypeMenu)
+    """
+    """
     TypeMenu.menu.add_command(command=r0, image=R0.get_img())
     TypeMenu.menu.add_command(command=r1, image=R1.get_img())
+    """
     TypeMenu.menu.add_command(command=r2, image=R2.get_img())
+    """
     TypeMenu.menu.add_command(command=r3, image=R3.get_img())
-    TypeMenu.menu.add_command(command=r4, image=R4.get_img())
+    """
+    TypeMenu.menu.add_command(command=r4_m1, image=R4_M1.get_img())
+    TypeMenu.menu.add_command(command=r4_m2, image=R4_M2.get_img())
+    """
     TypeMenu.menu.add_command(command=r5, image=R5.get_img())
+    """
     TypeMenu["text"] = "Select type of module, please"
 
     frameTop = tkinter.Frame(MM)
@@ -159,7 +181,8 @@ try:
     CheckPosBoard.pack(side=LEFT, fill=BOTH)
     CheckGlueT.pack(side=RIGHT, fill=BOTH)
     CheckSurfaceBoard.pack(side=LEFT, fill=BOTH)
-    CheckModuleBow.pack(side=RIGHT, fill=BOTH)
+    # ↓ potencialni dalsi sessiony
+    # CheckModuleBow.pack(side=RIGHT, fill=BOTH)
     frameTBTB.pack(side=BOTTOM, fill=BOTH)
     ButtonStart.pack(side=BOTTOM, fill=BOTH)
 
@@ -171,9 +194,8 @@ try:
     CheckSurfaceBoard.select()
     CheckModuleBow.select()
     try:
-        pass
-        # MM_icon.load_img()
-        # MM.iconbitmap(MM_icon.get_img())
+        MM_icon.load_img()
+        MM.iconbitmap(MM_icon.img_address)
     except tkinter.TclError:
         pass  # It doesn't matter, if program can't import icon.
 

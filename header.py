@@ -1,3 +1,6 @@
+import os
+import traceback
+
 from PIL import Image, ImageTk
 import pyautogui as pag
 import datetime
@@ -16,8 +19,7 @@ def memory(memory_type):
 
 
 def w(im, reg, session):
-    if not pag.locateCenterOnScreen(im, grayscale=True, region=reg, confidence=0.98):
-        session.finding_height_attempt += 1
+    if not pag.locateCenterOnScreen(im, grayscale=True, region=reg, confidence=0.97):
         return True
     else:
         return False
@@ -25,6 +27,7 @@ def w(im, reg, session):
 
 class Com:
     path = ""
+    type = ""
 
     @classmethod
     def set_path(cls, _path):
@@ -45,7 +48,7 @@ class Com:
 
     @classmethod
     def set_log(cls):
-        cls.log_file = "C:\\Users\\student\\Documents\\" \
+        cls.log_file = "C:\\Users\\admin\\Documents\\" \
                        + "logs\\" + datetime.datetime.now().strftime("%y_%m_%d_%H_%M") + ".txt"
         with open(cls.log_file, 'w+') as file:
             file.write("START OF MEASURING: " + datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
@@ -83,8 +86,21 @@ class Object(Com):
         return self.position
 
     def if_exist(self, grayscale=True):
+        if self.position[0] >= 40:
+            _pos1 = self.position[0]-40
+            _xran = self.x_range + 40
+        else:
+            _pos1 = 0
+            _xran = self.x_range
+        if self.position[1] >= 20:
+            _pos2 = self.position[1]-20
+            _yran = self.y_range + 20
+        else:
+            _pos2 = 0
+            _yran = self.y_range
+
         return pag.locateCenterOnScreen(self.img_address, grayscale=grayscale, confidence=0.95,
-                                        region=(self.position[0], self.position[1], self.x_range, self.y_range))
+                                        region=(_pos1, _pos2, _xran, _yran))
 
     def load_img(self):
         try:
@@ -92,8 +108,11 @@ class Object(Com):
         except OSError:
             raise AssertionError("Not found '%s' screenshot." % self.img_address)
 
-    def click(self, x_offset=0, y_offset=0):
-        pag.click((self.position[0] + x_offset, self.position[1] + y_offset))
+    def click(self, x_offset=0, y_offset=0, double=False):
+        if double:
+            pag.doubleClick((self.position[0] + x_offset, self.position[1] + y_offset))
+        else:
+            pag.click((self.position[0] + x_offset, self.position[1] + y_offset))
 
     def find_pos(self, grayscale=True):
         _position = self.if_exist(grayscale)
@@ -112,7 +131,7 @@ class Object(Com):
 class Sesion(Com):
     finding_height_attempt = 0
 
-    def __init__(self, name, screen_lr, screen_hr, _finding_change_indexes=(3, 5, 8, 13), _finding_height_dir=True):
+    def __init__(self, name, screen_lr, screen_hr, _finding_change_indexes=(3, 5, 8, 13, 20), _finding_height_dir=True):
         self.end = False
         self.name = name
         self.screen_lr = screen_lr
@@ -131,13 +150,21 @@ class Sesion(Com):
         else:
             return False
 
-    def set_height(self, low, high, height):
+    def set_height(self, low, high, height, min_height):
         if self.end:
             return 0
+        self.finding_height_attempt = 0
         low.find_pos()
         high.find_pos()
+        min_height.x_range = 40
 
-        while w(height, (high.pos()[0], high.pos()[1], 100, 80), self):
+        while w(height, (high.pos()[0], high.pos()[1] + 80, 120, 180), self):
+            if min_height.if_exist():
+                self.save_log("\n" + datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+                              + "| Minimum height value of station in %s sesion has been reached." % self.name)
+                pag.alert("Minimum height value of station has been reached!\n\n"
+                          "Please, fix the problem and restart the program.", "PROBLEM")
+                break
             if not self.finding_change_indexes:
                 self.save_log("\n" + datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
                               + "| Can not be set correct height of station in %s sesion." % self.name)
@@ -150,21 +177,30 @@ class Sesion(Com):
                         low.click()
                     else:
                         high.click()
-                    self.delay(1000)
+                    self.delay(2800)
                 self.finding_change_indexes = self.finding_change_indexes[1:]
 
             if self.finding_height_dir:
                 low.click()
             else:
                 high.click()
-            self.delay(1500)
 
-    def open_sesion(self, load_sesion):
+            self.finding_height_attempt += 1
+            self.delay(3300)
+
+    def open_sesion(self, load_session1, load_session2, load_session3):
         if self.end:
             return 0
-        load_sesion.find_pos()
-        load_sesion.click(2, 2)
-        self.delay(2000)
+        if load_session1.if_exist():
+            load_session1.find_pos()
+            load_session1.click()
+        elif load_session2.if_exist():
+            load_session2.find_pos()
+            load_session2.click()
+        elif load_session3.if_exist():
+            load_session2.find_pos()
+            load_session2.click()
+        self.delay(1500)  # maybe better solution
         pag.hotkey("alt", "d")
         self.delay(500)
         pag.typewrite(self.path + "Sessions\\")
@@ -172,9 +208,13 @@ class Sesion(Com):
         self.delay(500)
         pag.typewrite(self.name + ".Session")
 
-        self.delay(1000)
+        self.delay(500)
         pag.typewrite(["enter"])
+        self.delay(500)
+        pag.typewrite(["enter"])
+
         self.delay(1000)
+        pag.typewrite(self.type + "_" + self.serial_number + "_" + self.name)
         pag.typewrite(["enter"])
 
     def start_sesion(self, start_ses):
@@ -182,7 +222,28 @@ class Sesion(Com):
             return 0
         start_ses.find_pos()
         start_ses.click(2, 2)
-        # next things ..?
+        pag.moveRel(-300, -200)
+
+    """def wait_log(self, string_condition1, string_condition2=""):
+        _path = "C:\\ProgramData\\Optimet\\ConoScan 4000\\Sessions\\"\
+                + self.type + "_" + self.serial_number + "_" + self.name + "\\Trace.txt"
+        try:
+            pag.alert(os.path.exists(_path))
+            with open(_path, 'r') as file:
+                pag.alert(_path)
+                for line in file:
+                    if string_condition1 in line:
+                        if string_condition2 != "":
+                            self.delay(5000)
+                            if string_condition2 in file.readlines()[-1] or \
+                                    string_condition2 in file.readlines()[-2]:
+                                return False
+                        else:
+                            return False
+                file.close()
+        except:
+            pag.alert(traceback.format_exc())
+        return True"""
 
     def end_sesion(self):
         self.end = True
